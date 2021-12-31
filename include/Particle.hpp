@@ -34,8 +34,17 @@ public:
     // Return true if this particle is colliding with p2.
     bool isCollidingWith(Particle& p2);
 
+    // Return true if this particle has been absorbed by another.
+    bool isAbsorbed();
+
     // Return the radius of a particle with a given mass.
     double calculateRadius(double mass);
+
+    // Return the radius of this particle.
+    double getRadius();
+
+    // Return the mass of this particle.
+    double getMass();
 
     // Simulate the effect of elasticity by applying a force to the particle's
     // motion vector.

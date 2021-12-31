@@ -2,7 +2,7 @@
 
 
 namespace{
-    double GRAVITATIONAL_CONSTANT = 0.01;
+    double GRAVITATIONAL_CONSTANT = 0.0001;
     double ELASTICITY_CONSTANT = 0.9;
 }
 
@@ -102,7 +102,7 @@ void Particle::coalesce(Particle& p2)
     // Case where p2 is larger.
     else if (mass < p2.mass)
     {
-        p2.x_pos = (p2.x_pos * p2.mass + x_pos + mass) / totalMass;
+        p2.x_pos = (p2.x_pos * p2.mass + x_pos * mass) / totalMass;
 
         double smallerVecMagnitude = (vec.magnitude() * mass) / totalMass;
         double smallerVecAngle = vec.angle();
@@ -133,9 +133,27 @@ bool Particle::isCollidingWith(Particle& p2)
 }
 
 
+bool Particle::isAbsorbed()
+{
+    return absorbed;
+}
+
+
 double Particle::calculateRadius(double mass)
 {
     return std::sqrt(mass);
+}
+
+
+double Particle::getRadius()
+{
+    return rad;
+}
+
+
+double Particle::getMass()
+{
+    return mass;
 }
 
 

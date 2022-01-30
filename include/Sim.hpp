@@ -16,7 +16,7 @@ public:
     // Constructor.
     Sim();
 
-    Sim(unsigned numParticles);
+    Sim(unsigned numParticles=10);
 
     // Destructor.
     ~Sim();
@@ -32,7 +32,14 @@ private:
     // Handle any SDL_Event.
     void handleEvent(SDL_Event* Event);
 
-    void drawSDLCircle(std::vector<double> pos, double radius);
+    // Draw an SDL circle at the given x and y coordinates, with a 
+    // specified radius and opacity.
+    void drawSDLCircle(double x, double y, double radius, int r=255, int g=255, int b=255);
+
+    // Given points xc and yc for the center of a circle, and points x y
+    // on the edge of the circle, draw the corresponding points in all 8 octants,
+    // and lines between them.
+    void drawOctantLines(double xc, double yc, double x, double y);
 
     // Draw all the particles to the screen.
     void drawParticles();
@@ -49,9 +56,13 @@ private:
     Environment env;
 
     bool running;
-    
-};
 
+    // For ghost particles.
+    double ghostX;
+    double ghostY;
+    double ghostRad;
+    bool showGhostParticle;
+};
 
 
 #endif

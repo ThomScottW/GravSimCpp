@@ -2,7 +2,6 @@
 #define PARTICLE_HPP
 
 
-#include <vector>
 #include "MotionVector.hpp"
 
 
@@ -11,25 +10,29 @@ class Particle
 public:
     Particle(
         double radius,
-        std::vector<double> position,
+        double x,
+        double y,
         double mass,
         MotionVector<double> vec
     );
 
-    // Return the pixel coordinates of this Particle.
-    std::vector<double> coordinates();
+    // Return the x coordinate of this particle.
+    double x();
+
+    // Return the y coordinate of this particle.
+    double y();
     
     // Move the particle based on its vector's direction and speed.
     void move();
 
     // Accelrate this particle towards a point.
-    void accelerateTowards(std::vector<double> point, double pointMass=1);
+    void accelerateTowards(double x, double y, double pointMass=1);
 
     // Collide with another particle, coalescing into a larger particle.
     void coalesce(Particle& p2);
 
     // Return the distance from this particle's center to a point.
-    double distanceFrom(std::vector<double> point);
+    double distanceFrom(double x, double y);
 
     // Return true if this particle is colliding with p2.
     bool isCollidingWith(Particle& p2);
@@ -49,7 +52,6 @@ public:
     // Simulate the effect of elasticity by applying a force to the particle's
     // motion vector.
     void applyElasticity();
-
 
 
 private:

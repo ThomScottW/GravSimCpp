@@ -9,7 +9,6 @@ template <typename CompType>
 class MotionVector
 {
 public:
-
     // Constructor that allows us to create a MotionVector with no arguments.
     // Initalizes the x and y components to be 0.
     MotionVector();
@@ -62,11 +61,9 @@ public:
     MotionVector<CompType> operator*(FacType factor);
 
 
-
 private:
     CompType x_comp;
     CompType y_comp;
-
 };
 
 
@@ -190,7 +187,6 @@ MotionVector<CompType> MotionVector<CompType>::operator*(FacType factor)
 
     return newMV;
 }
-
 
 
 #endif

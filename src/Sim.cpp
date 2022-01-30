@@ -242,6 +242,5 @@ int Sim::run()
 
         // SDL_Delay(100);
     }
-
     return 0;
 }

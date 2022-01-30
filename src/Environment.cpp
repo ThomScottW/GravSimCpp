@@ -4,7 +4,7 @@
 Environment::Environment(unsigned numParticles)
     : numParticles{numParticles}
 {
-    particles = std::vector<Particle>();
+    particles = std::list<Particle>();
 
     for (unsigned i = 0; i < numParticles; ++i){
         particles.push_back(genRandomParticle());
@@ -66,7 +66,7 @@ void Environment::placeParticle(Particle p)
 }
 
 
-std::vector<Particle>& Environment::getParticles()
+std::list<Particle>& Environment::getParticles()
 {
     return particles;
 }

@@ -8,7 +8,5 @@ int main()
 
     Simulator.run();
     
-
-
     return 0;
 }

@@ -4,8 +4,9 @@
 
 #include <cstdlib>
 #include <list>
+#include <vector>
+#include <iostream>
 #include "Particle.hpp"
-
 
 
 class Environment
@@ -20,19 +21,24 @@ public:
     // Generate a random particle.
     Particle genRandomParticle();
 
+    // Place a particle into the environment.
+    void placeParticle(Particle p);
+
     // Return a reference to the list of particles in this environment.
-    std::vector<Particle>& getParticles();
+    std::list<Particle>& getParticles();
 
     // Return a vector containing width and height of this environment.
     std::vector<unsigned> dimensions();
 
 
-
-    
-
 private:
+
+    // Returns true if particle p is out of bounds.
+    bool isOutsideBounds(Particle p);
+
+
     unsigned numParticles;
-    std::vector<Particle> particles;
+    std::list<Particle> particles;
     unsigned width = 800;
     unsigned height = 800;
 

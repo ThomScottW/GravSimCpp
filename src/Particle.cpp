@@ -9,19 +9,25 @@ namespace{
 
 Particle::Particle(
     double radius,
-    std::vector<double> position,
+    double x,
+    double y,
     double mass,
     MotionVector<double> vec
 )
-    : rad{radius}, x_pos{position[0]}, y_pos{position[1]}, mass{mass}, vec{vec}, absorbed{false}
+    : rad{radius}, x_pos{x}, y_pos{y}, mass{mass}, vec{vec}, absorbed{false}
 {
 }
 
 
-std::vector<double> Particle::coordinates()
+double Particle::x()
 {
-    std::vector<double> coords = {x_pos, y_pos};
-    return coords;
+    return x_pos;
+}
+
+
+double Particle::y()
+{
+    return y_pos;
 }
 
 
@@ -41,10 +47,10 @@ void Particle::move()
 }
 
 
-void Particle::accelerateTowards(std::vector<double> point, double pointMass)
+void Particle::accelerateTowards(double x, double y, double pointMass)
 {
-    double dx = point[0] - x_pos;
-    double dy = point[1] - y_pos;
+    double dx = x - x_pos;
+    double dy = y - y_pos;
     double dist = std::hypot(dx, dy);
 
     double angleBetweenPoints = std::atan2(dy, dx);
@@ -121,15 +127,15 @@ void Particle::coalesce(Particle& p2)
 }
 
 
-double Particle::distanceFrom(std::vector<double> point)
+double Particle::distanceFrom(double x, double y)
 {
-    return std::hypot(point[0] - x_pos, point[1] - y_pos);
+    return std::hypot(x - x_pos, y - y_pos);
 }
 
 
 bool Particle::isCollidingWith(Particle& p2)
 {
-    return (distanceFrom(p2.coordinates()) < rad + p2.rad);
+    return (distanceFrom(p2.x_pos, p2.y_pos) < rad + p2.rad);
 }
 
 

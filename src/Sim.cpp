@@ -1,14 +1,15 @@
 #include "Sim.hpp"
 
 
-Sim::Sim()
-    : win{nullptr}, winSurface{nullptr}, ren{nullptr}, running{true}
-{
-    env = Environment();
-}
-
 Sim::Sim(unsigned numParticles)
-    : win{nullptr}, winSurface{nullptr}, ren{nullptr}, running{true}
+    : win{nullptr},
+    winSurface{nullptr},
+    ren{nullptr},
+    running{true},
+    ghostX{-1},
+    ghostY{-1},
+    ghostRad{5},
+    showGhostParticle{false}
 {
     env = Environment(numParticles);
 }
@@ -75,31 +76,69 @@ bool Sim::Init()
 }
 
 
-void Sim::drawSDLCircle(std::vector<double> pos, double radius)
+void Sim::drawOctantLines(double xc, double yc, double x, double y)
 {
-    // Set the color of the circles.
-    SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+    // I found that drawing the lines horizontally worked better.
+    // There were less "gaps". And through testing it seems there's no need
+    // to draw the points on the edge of the circle this way.
 
-    // Circle Equation: (x-h)^2 + (y-k)^2 = r^2
-    double xTerm;
-    double yTerm;
-    double h = pos.at(0);  // Center x.
-    double k = pos.at(1);  // Center y.
+    // Lines between 2nd and 3rd octant.
+    SDL_RenderDrawLine(ren, xc + x, yc - y, xc - x, yc - y);
+    // Lines between 1st and 4th octant.
+    SDL_RenderDrawLine(ren, xc + y, yc - x, xc - y, yc - x);
+    // Lines between 8th and 5th octant.
+    SDL_RenderDrawLine(ren, xc + y, yc + x, xc - y, yc + x);
+    // Lines between 7th and 6th octant.
+    SDL_RenderDrawLine(ren, xc + x, yc + y, xc - x, yc + y);
+
+    // Draws points on the edge of the circle.
+    // SDL_RenderDrawPoint(ren, xc + x, yc + y);
+    // SDL_RenderDrawPoint(ren, xc - x, yc + y);
+    // SDL_RenderDrawPoint(ren, xc + x, yc - y);
+    // SDL_RenderDrawPoint(ren, xc - x, yc - y);
+    // SDL_RenderDrawPoint(ren, xc + y, yc + x);
+    // SDL_RenderDrawPoint(ren, xc - y, yc + x);
+    // SDL_RenderDrawPoint(ren, xc + y, yc - x);
+    // SDL_RenderDrawPoint(ren, xc - y, yc - x);
+    
+    // // Draws lines between the 1st and 5th octant.
+    // SDL_RenderDrawLine(ren, xc + y, yc - x, xc - y, yc + x);
+    // // Draws lines between the 2nd and 6th octant.
+    // SDL_RenderDrawLine(ren, xc + x, yc - y, xc - x, yc + y);
+    // // Draws lines between the 3rd and 7th octant.
+    // SDL_RenderDrawLine(ren, xc - x, yc - y, xc + x, yc + y);
+    // // Draws lines between the 4th and 8th octant.
+    // SDL_RenderDrawLine(ren, xc - y, yc - x, xc + y, yc + x);  
+}
 
 
-    for (double x = h - radius; x < h + radius; ++x)
+void Sim::drawSDLCircle(double h, double k, double radius, int r, int g, int b)
+{
+    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+
+    double x = 0;
+    double y = radius;
+    double d = 3 - 2 * radius;
+
+    drawOctantLines(h, k, x, y);
+
+    // This is bresenham's circle drawing algorithm. We draw the 2nd octant
+    // of the circle. The other octants can be inferred from this one.
+    while (y > x)
     {
-        for (double y = k - radius; y < k + radius; ++y)
+        // Decide whether y will stay the same, or decrease.
+        if (d <= 0)
         {
-            xTerm = (x - h) * (x - h);
-            yTerm = (y - k) * (y - k);
-
-            // Only draw a point if it is within the circle.
-            if (xTerm + yTerm <= radius * radius)
-            {
-                SDL_RenderDrawPoint(ren, x, y);
-            } 
+            d = d + 4 * x + 6;
         }
+        else
+        {
+            d = d + 4 * (x - y) + 10;
+            --y;
+        }
+        ++x;
+
+        drawOctantLines(h, k, x, y);
     }
 }
 
@@ -108,7 +147,12 @@ void Sim::drawParticles()
 {
     for (Particle p : env.getParticles())
     {
-        drawSDLCircle(p.coordinates(), p.getRadius());
+        drawSDLCircle(p.x(), p.y(), p.getRadius());
+    }
+
+    if (showGhostParticle)
+    {
+        drawSDLCircle(ghostX, ghostY, ghostRad, 100, 100, 100);
     }
 }
 
@@ -152,6 +196,44 @@ int Sim::run()
             {
                 running = false;
             }
+            else if (Event.type == SDL_MOUSEBUTTONDOWN)
+            {
+                if (Event.button.button == SDL_BUTTON_LEFT)
+                {
+                    showGhostParticle = true;
+                }
+            }
+            else if (Event.type == SDL_MOUSEBUTTONUP)
+            {
+                if (Event.button.button == SDL_BUTTON_LEFT)
+                {
+                    showGhostParticle = false;
+                }
+                else if (Event.button.button == SDL_BUTTON_RIGHT && showGhostParticle)
+                {
+                    MotionVector<double> newMot = MotionVector<double>(0, 0);
+                    env.placeParticle(Particle(ghostRad, ghostX, ghostY, std::pow(ghostRad, 2), newMot));
+                }
+            }
+            else if (Event.type == SDL_MOUSEMOTION)
+            {
+                // Get the x and y coordinates of the mouse.
+                ghostX = Event.button.x;
+                ghostY = Event.button.y;
+            }
+            else if (Event.type == SDL_MOUSEWHEEL)
+            {
+                if (Event.wheel.y > 0)
+                {
+                    ++ghostRad;
+                }
+                else if (Event.wheel.y < 0)
+                {
+                    --ghostRad;
+                }
+                
+            }
+            
         }
 
         env.update();

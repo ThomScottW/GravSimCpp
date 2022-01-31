@@ -34,12 +34,12 @@ private:
 
     // Draw an SDL circle at the given x and y coordinates, with a 
     // specified radius and opacity.
-    void drawSDLCircle(double x, double y, double radius, int r=255, int g=255, int b=255);
+    void drawSDLCircle(double x, double y, double radius, bool filled, int r=255, int g=255, int b=255);
 
     // Given points xc and yc for the center of a circle, and points x y
     // on the edge of the circle, draw the corresponding points in all 8 octants,
     // and lines between them.
-    void drawOctantLines(double xc, double yc, double x, double y);
+    void drawCirclePixels(double xc, double yc, double x, double y, bool filled);
 
     // Draw all the particles to the screen.
     void drawParticles();
@@ -58,10 +58,17 @@ private:
     bool running;
 
     // For ghost particles.
-    double ghostX;
-    double ghostY;
+    double mouseX;
+    double mouseY;
     double ghostRad;
     bool showGhostParticle;
+
+    // For freezing particles.
+    Particle* frozenP;
+
+    // For choosing orbit particles.
+    Particle* orbitCenter;
+    bool choosingOrbit;
 };
 
 

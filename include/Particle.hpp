@@ -12,8 +12,8 @@ public:
         double radius,
         double x,
         double y,
-        double mass,
-        MotionVector<double> vec
+        MotionVector<double> vec,
+        double density=0.15
     );
 
     // Return the x coordinate of this particle.
@@ -26,10 +26,11 @@ public:
     void move();
 
     // Accelrate this particle towards a point.
-    void accelerateTowards(double x, double y, double pointMass=1);
+    void accelerateTowards(double x, double y, double constant, double pointMass=1);
 
-    // Collide with another particle, coalescing into a larger particle.
-    void coalesce(Particle& p2);
+    // Collide with another particle, coalescing into a larger particle. An elasticity
+    // constant simulates the loss of energy after collision.
+    void coalesce(Particle& p2, double constant);
 
     // Return the distance from this particle's center to a point.
     double distanceFrom(double x, double y);
@@ -40,8 +41,20 @@ public:
     // Return true if this particle has been absorbed by another.
     bool isAbsorbed();
 
+    // Stops the particle from being affected by gravity and freezes it in place.
+    void freeze();
+
+    // The particle can now be affected by gravity.
+    void unFreeze();
+
+    // Return true if the particle is frozen.
+    bool isFrozen();
+
     // Return the radius of a particle with a given mass.
-    double calculateRadius(double mass);
+    double static calcRad(double mass, double density);
+
+    // Return the mass of a particle, given a radius.
+    double static calcMass(double radius, double density);
 
     // Return the radius of this particle.
     double getRadius();
@@ -50,8 +63,8 @@ public:
     double getMass();
 
     // Simulate the effect of elasticity by applying a force to the particle's
-    // motion vector.
-    void applyElasticity();
+    // motion vector. The elasticity constant is defined by the environment.
+    void applyElasticity(double constant);
 
 
 private:
@@ -60,7 +73,9 @@ private:
     double y_pos;
     double mass;
     MotionVector<double> vec;
+    double density;
     bool absorbed;
+    bool fixed;
 };
 
 

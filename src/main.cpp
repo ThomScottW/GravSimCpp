@@ -4,7 +4,7 @@
 
 int main()
 {
-    Sim Simulator = Sim(80);
+    Sim Simulator = Sim(40);
 
     Simulator.run();
     

@@ -1,21 +1,16 @@
 #include "Particle.hpp"
 
 
-namespace{
-    double GRAVITATIONAL_CONSTANT = 0.0001;
-    double ELASTICITY_CONSTANT = 0.9;
-}
-
-
 Particle::Particle(
     double radius,
     double x,
     double y,
-    double mass,
-    MotionVector<double> vec
+    MotionVector<double> vec,
+    double density
 )
-    : rad{radius}, x_pos{x}, y_pos{y}, mass{mass}, vec{vec}, absorbed{false}
+    : rad{radius}, x_pos{x}, y_pos{y}, vec{vec}, density{density}, absorbed{false}, fixed{false}
 {
+    mass = calcMass(radius, density);
 }
 
 
@@ -33,6 +28,11 @@ double Particle::y()
 
 void Particle::move()
 {
+    if (fixed)
+    {
+        return;
+    }
+    
     // Get the angle and magnitude of this particle's motion vector.
     double vec_angle = vec.angle();
     double vec_mag = vec.magnitude();
@@ -47,8 +47,13 @@ void Particle::move()
 }
 
 
-void Particle::accelerateTowards(double x, double y, double pointMass)
+void Particle::accelerateTowards(double x, double y, double constant, double pointMass)
 {
+    if (fixed)
+    {
+        return;
+    }
+
     double dx = x - x_pos;
     double dy = y - y_pos;
     double dist = std::hypot(dx, dy);
@@ -58,7 +63,7 @@ void Particle::accelerateTowards(double x, double y, double pointMass)
     // The gravitational equation.
     // This calculated force will be the magnitude of the vector that we'll add to this
     // particle's existing motion vector, simulating an acceleration towards the point.
-    double force = (GRAVITATIONAL_CONSTANT * mass * pointMass) / std::pow(dist, 2);
+    double force = (constant * mass * pointMass) / std::pow(dist, 2);
 
     double forceXComp = std::cos(angleBetweenPoints) * force;
     double forceYComp = std::sin(angleBetweenPoints) * force;
@@ -69,7 +74,7 @@ void Particle::accelerateTowards(double x, double y, double pointMass)
 }
 
 
-void Particle::coalesce(Particle& p2)
+void Particle::coalesce(Particle& p2, double constant)
 {
     if (!isCollidingWith(p2))
     {
@@ -96,11 +101,11 @@ void Particle::coalesce(Particle& p2)
         vec = vec + MotionVector<double>(smallerVecX, smallerVecY);
 
         // Make it seem like energy was lost during the collision.
-        applyElasticity();
+        applyElasticity(constant);
 
         // Update mass and change radius accordingly.
         mass = totalMass;
-        rad = calculateRadius(mass);
+        rad = calcRad(totalMass, density);
 
         // Set this flag to true so the simulation can remove p2.
         p2.absorbed = true;
@@ -117,10 +122,10 @@ void Particle::coalesce(Particle& p2)
 
         p2.vec = p2.vec + MotionVector<double>(smallerVecX, smallerVecY);
 
-        p2.applyElasticity();
+        p2.applyElasticity(constant);
 
         p2.mass = totalMass;
-        p2.rad = calculateRadius(totalMass);
+        p2.rad = Particle::calcRad(totalMass, density);
 
         absorbed = true;
     }
@@ -145,9 +150,35 @@ bool Particle::isAbsorbed()
 }
 
 
-double Particle::calculateRadius(double mass)
+void Particle::freeze()
 {
-    return std::sqrt(mass);
+    fixed = true;
+    vec.setX(0);
+    vec.setY(0);
+}
+
+
+void Particle::unFreeze()
+{
+    fixed = false;
+}
+
+
+bool Particle::isFrozen()
+{
+    return fixed;
+}
+
+
+double Particle::calcRad(double mass, double density)
+{
+    return std::cbrt((3.0 / (4.0 * density * M_PI)) * mass);
+}
+
+
+double Particle::calcMass(double radius, double density)
+{
+    return (4.0 / 3.0) * M_PI * std::pow(radius, 3) * density;
 }
 
 
@@ -163,7 +194,7 @@ double Particle::getMass()
 }
 
 
-void Particle::applyElasticity()
+void Particle::applyElasticity(double constant)
 {
-    vec = vec * ELASTICITY_CONSTANT;
+    vec = vec * constant;
 }

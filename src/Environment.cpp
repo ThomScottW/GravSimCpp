@@ -27,7 +27,7 @@ void Environment::update()
         }
     }
 
-
+    // Gravity.
     for (auto pIt1 = particles.begin(); pIt1 != particles.end(); ++pIt1)
     {
         (*pIt1).move();
@@ -36,8 +36,9 @@ void Environment::update()
         {
             if (pIt1 != pIt2)
             {
-                (*pIt1).accelerateTowards((*pIt2).x(), (*pIt2).y(), (*pIt2).getMass());
-                (*pIt1).coalesce(*pIt2);
+                (*pIt1).accelerateTowards((*pIt2).x(), (*pIt2).y(),
+                 Environment::GRAVITATIONAL_CONSTANT, (*pIt2).getMass());
+                (*pIt1).coalesce(*pIt2, Environment::ELASTICITY_CONSTANT);
             }
         }
     }
@@ -46,23 +47,36 @@ void Environment::update()
 
 Particle Environment::genRandomParticle()
 {
-    double radius = std::rand() % 10 + 5;
+    double radius = std::rand() % 5 + 1;
 
     // Random positions that will fit within the window.
     double x = std::rand() % width;
     double y = std::rand() % height;
-    double mass = std::pow(radius, 2);
 
     // 0 Motion Vector.
     MotionVector<double> vec = MotionVector<double>(0, 0);
 
-    return Particle(radius, x, y, mass, vec);
+    return Particle(radius, x, y, vec);
 }
 
 
 void Environment::placeParticle(Particle p)
 {
     particles.push_back(p);
+}
+
+
+Particle* Environment::findParticle(double x, double y)
+{
+    for (auto it = particles.begin(); it != particles.end(); ++it)
+    {
+        if (std::hypot(x - (*it).x(), y - (*it).y()) <= (*it).getRadius())
+        {
+            return &(*it);
+        }
+    }
+
+    return nullptr;
 }
 
 

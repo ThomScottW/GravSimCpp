@@ -1,15 +1,23 @@
 #include "Sim.hpp"
 
 
+namespace
+{
+    double const PI = std::atan(1) * 4;
+}
+
+
 Sim::Sim(unsigned numParticles)
     : win{nullptr},
     winSurface{nullptr},
     ren{nullptr},
     running{true},
-    ghostX{-1},
-    ghostY{-1},
+    mouseX{-1},
+    mouseY{-1},
     ghostRad{5},
-    showGhostParticle{false}
+    showGhostParticle{false},
+    frozenP{nullptr},
+    choosingOrbit{false}
 {
     env = Environment(numParticles);
 }
@@ -76,31 +84,35 @@ bool Sim::Init()
 }
 
 
-void Sim::drawOctantLines(double xc, double yc, double x, double y)
+void Sim::drawCirclePixels(double xc, double yc, double x, double y, bool filled)
 {
     // I found that drawing the lines horizontally worked better.
     // There were less "gaps". And through testing it seems there's no need
     // to draw the points on the edge of the circle this way.
 
-    // Lines between 2nd and 3rd octant.
-    SDL_RenderDrawLine(ren, xc + x, yc - y, xc - x, yc - y);
-    // Lines between 1st and 4th octant.
-    SDL_RenderDrawLine(ren, xc + y, yc - x, xc - y, yc - x);
-    // Lines between 8th and 5th octant.
-    SDL_RenderDrawLine(ren, xc + y, yc + x, xc - y, yc + x);
-    // Lines between 7th and 6th octant.
-    SDL_RenderDrawLine(ren, xc + x, yc + y, xc - x, yc + y);
-
-    // Draws points on the edge of the circle.
-    // SDL_RenderDrawPoint(ren, xc + x, yc + y);
-    // SDL_RenderDrawPoint(ren, xc - x, yc + y);
-    // SDL_RenderDrawPoint(ren, xc + x, yc - y);
-    // SDL_RenderDrawPoint(ren, xc - x, yc - y);
-    // SDL_RenderDrawPoint(ren, xc + y, yc + x);
-    // SDL_RenderDrawPoint(ren, xc - y, yc + x);
-    // SDL_RenderDrawPoint(ren, xc + y, yc - x);
-    // SDL_RenderDrawPoint(ren, xc - y, yc - x);
-    
+    if (filled)
+    {
+        // Lines between 2nd and 3rd octant.
+        SDL_RenderDrawLine(ren, xc + x, yc - y, xc - x, yc - y);
+        // Lines between 1st and 4th octant.
+        SDL_RenderDrawLine(ren, xc + y, yc - x, xc - y, yc - x);
+        // Lines between 8th and 5th octant.
+        SDL_RenderDrawLine(ren, xc + y, yc + x, xc - y, yc + x);
+        // Lines between 7th and 6th octant.
+        SDL_RenderDrawLine(ren, xc + x, yc + y, xc - x, yc + y);
+    }
+    else
+    {
+        // Draws points on the edge of the circle.
+        SDL_RenderDrawPoint(ren, xc + x, yc + y);
+        SDL_RenderDrawPoint(ren, xc - x, yc + y);
+        SDL_RenderDrawPoint(ren, xc + x, yc - y);
+        SDL_RenderDrawPoint(ren, xc - x, yc - y);
+        SDL_RenderDrawPoint(ren, xc + y, yc + x);
+        SDL_RenderDrawPoint(ren, xc - y, yc + x);
+        SDL_RenderDrawPoint(ren, xc + y, yc - x);
+        SDL_RenderDrawPoint(ren, xc - y, yc - x);
+    }
     // // Draws lines between the 1st and 5th octant.
     // SDL_RenderDrawLine(ren, xc + y, yc - x, xc - y, yc + x);
     // // Draws lines between the 2nd and 6th octant.
@@ -112,7 +124,7 @@ void Sim::drawOctantLines(double xc, double yc, double x, double y)
 }
 
 
-void Sim::drawSDLCircle(double h, double k, double radius, int r, int g, int b)
+void Sim::drawSDLCircle(double h, double k, double radius, bool filled, int r, int g, int b)
 {
     SDL_SetRenderDrawColor(ren, r, g, b, 255);
 
@@ -120,7 +132,7 @@ void Sim::drawSDLCircle(double h, double k, double radius, int r, int g, int b)
     double y = radius;
     double d = 3 - 2 * radius;
 
-    drawOctantLines(h, k, x, y);
+    drawCirclePixels(h, k, x, y, filled);
 
     // This is bresenham's circle drawing algorithm. We draw the 2nd octant
     // of the circle. The other octants can be inferred from this one.
@@ -138,7 +150,7 @@ void Sim::drawSDLCircle(double h, double k, double radius, int r, int g, int b)
         }
         ++x;
 
-        drawOctantLines(h, k, x, y);
+        drawCirclePixels(h, k, x, y, filled);
     }
 }
 
@@ -147,12 +159,27 @@ void Sim::drawParticles()
 {
     for (Particle p : env.getParticles())
     {
-        drawSDLCircle(p.x(), p.y(), p.getRadius());
+        drawSDLCircle(p.x(), p.y(), p.getRadius(), true);
     }
 
-    if (showGhostParticle)
+    if (showGhostParticle || choosingOrbit)
     {
-        drawSDLCircle(ghostX, ghostY, ghostRad, 100, 100, 100);
+        drawSDLCircle(mouseX, mouseY, ghostRad, true, 100, 100, 100);
+    }
+
+    if (choosingOrbit)
+    {
+        // Draw a circle, centered at the orbitCenter particle, and that extends to
+        // the mouse cursor.
+        drawSDLCircle(
+            (*orbitCenter).x(),
+            (*orbitCenter).y(),
+            std::hypot(mouseX - (*orbitCenter).x(), mouseY - (*orbitCenter).y()),
+            false,
+            100, 100, 100
+        );
+
+        // Then, draw a circle, centered at the mouse cursor.
     }
 }
 
@@ -198,7 +225,7 @@ int Sim::run()
             }
             else if (Event.type == SDL_MOUSEBUTTONDOWN)
             {
-                if (Event.button.button == SDL_BUTTON_LEFT)
+                if (Event.button.button == SDL_BUTTON_LEFT && !showGhostParticle)
                 {
                     showGhostParticle = true;
                 }
@@ -212,14 +239,14 @@ int Sim::run()
                 else if (Event.button.button == SDL_BUTTON_RIGHT && showGhostParticle)
                 {
                     MotionVector<double> newMot = MotionVector<double>(0, 0);
-                    env.placeParticle(Particle(ghostRad, ghostX, ghostY, std::pow(ghostRad, 2), newMot));
+                    env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot));
                 }
             }
             else if (Event.type == SDL_MOUSEMOTION)
             {
                 // Get the x and y coordinates of the mouse.
-                ghostX = Event.button.x;
-                ghostY = Event.button.y;
+                mouseX = Event.button.x;
+                mouseY = Event.button.y;
             }
             else if (Event.type == SDL_MOUSEWHEEL)
             {
@@ -231,9 +258,61 @@ int Sim::run()
                 {
                     --ghostRad;
                 }
-                
             }
-            
+            else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_SPACE)
+            {
+                // Search if there is a particle near the mouse cursor.
+                if ( (frozenP = env.findParticle(mouseX, mouseY)) != nullptr )
+                {
+                    if ( (*frozenP).isFrozen() )
+                    {
+                        (*frozenP).unFreeze();
+                    }
+                    else
+                    {
+                        (*frozenP).freeze();
+                    }
+                }
+            }
+            else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_o && !choosingOrbit)
+            {
+                // See if we clicked on a particle.
+                if ( (orbitCenter = env.findParticle(mouseX, mouseY)) != nullptr )
+                {
+                    std::cout << "Orbit chosen" << std::endl;
+                    choosingOrbit = true;
+                }
+            }
+            else if (Event.type == SDL_KEYUP && Event.key.keysym.sym == SDLK_o && choosingOrbit)
+            {
+                std::cout << "Stopped choosing orbit" << std::endl;
+                choosingOrbit = false;
+
+                double ocX = (*orbitCenter).x();
+                double ocY = (*orbitCenter).y();
+
+                // Find the angle between the mouse cursor and the orbitCenter.
+                double orbitAngle = std::atan2(ocY - mouseY, ocX - mouseX);
+
+                // Subtract 90 degrees.
+                orbitAngle = std::fmod(orbitAngle - 0.5 * M_PI, 2 * M_PI);
+
+                // Distance between mouse and orbitCenter.
+                double dist = std::hypot(mouseX - ocX, mouseY - ocY);
+
+                // Calculate the necessary velocity.
+                double force = ghostRad * std::sqrt( 
+                    (Environment::GRAVITATIONAL_CONSTANT * (*orbitCenter).getMass() ) / dist );
+
+                // Create a MotionVector for the new particle.
+                MotionVector<double> newMot = MotionVector<double>(
+                    force * std::cos(orbitAngle),
+                    force * std::sin(orbitAngle)
+                );
+
+                // Place the particle.
+                env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot));
+            }
         }
 
         env.update();

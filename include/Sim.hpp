@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
@@ -25,6 +26,8 @@ public:
     // Runs an SDL game loop.
     int run();
 
+  
+    
 
 private:
     // Return true if SDL video elements are initialized successfully.
@@ -48,8 +51,11 @@ private:
     // Draw the screen.
     void drawScreen();
 
-    // Draw text to the screen.
-    void drawText(const char* text, int x, int y);
+    // Queue some text to be drawn.
+    void addText(std::string text, int x, int y);
+
+    // Draw text to the screen at specified coordinates.
+    void drawText(const char* text, int x, int y) const;
 
     // Generate a random Particle.
     Particle genParticle();
@@ -62,10 +68,19 @@ private:
     bool running;
 
     // For ghost particles.
+      struct Text
+    {
+        std::string t;
+        int x;
+        int y;
+    };
+
     double mouseX;
     double mouseY;
     double ghostRad;
     bool showGhostParticle;
+    int fontSize;
+    std::list<Text> texts; // List of items to print.
 
     // For freezing particles.
     Particle* frozenP;

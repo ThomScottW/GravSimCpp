@@ -80,6 +80,12 @@ bool Sim::Init()
 
     SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
 
+    // Init text.
+    if (TTF_Init() < 0)
+    {
+        std::cout << "Error: " << TTF_GetError() << std::endl;
+    }
+
     return true;
 }
 
@@ -184,8 +190,34 @@ void Sim::drawParticles()
 }
 
 
-void Sim::handleEvent(SDL_Event* Event){
-    return;
+
+// Draw text to the screen.
+void Sim::drawText(const char* text, int x, int y)
+{
+    TTF_Font* font = TTF_OpenFont("/home/scotttw/Projects/GravSim/grav.ttf", 20);
+
+    if (!font)
+    {
+        std::cout << font << std::endl;
+        std::cout << TTF_GetError() << std::endl;
+    }
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, {255, 255, 255});
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(ren, textSurface);
+
+    SDL_Rect textRect;
+    textRect.x = x;
+    textRect.y = y;
+
+    SDL_QueryTexture(textTexture, NULL, NULL, &textRect.w, &textRect.h);
+
+
+    SDL_RenderCopy(ren, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+    TTF_CloseFont(font);
 }
 
 
@@ -199,9 +231,17 @@ void Sim::drawScreen()
     // Draw the particles on top of that color.
     drawParticles();
 
+    // Draw text.
+    drawText("hi", 1, 1);
+
+
     // Then present the completed frame.
     SDL_RenderPresent(ren);
 }
+
+
+
+
 
 
 int Sim::run()
@@ -217,8 +257,6 @@ int Sim::run()
     {
         while (SDL_PollEvent(&Event) != 0)
         {
-            handleEvent(&Event);
-
             if (Event.type == SDL_QUIT)
             {
                 running = false;
@@ -256,7 +294,7 @@ int Sim::run()
                 }
                 else if (Event.wheel.y < 0)
                 {
-                    --ghostRad;
+                    ghostRad = ghostRad > 1 ? ghostRad - 1 : 1;
                 }
             }
             else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_SPACE)
@@ -298,20 +336,27 @@ int Sim::run()
                 orbitAngle = std::fmod(orbitAngle - 0.5 * M_PI, 2 * M_PI);
 
                 // Distance between mouse and orbitCenter.
-                double dist = std::hypot(mouseX - ocX, mouseY - ocY);
+                // double orbiterMass = Particle::calcMass(ghostRad, 1);
+                double distBetweenBodies = std::hypot(mouseX - ocX, mouseY - ocY);
+                // double massSum = orbiterMass + (*orbitCenter).getMass();
+
+                // double baryDist = distBetweenBodies - ((distBetweenBodies * orbiterMass) / (massSum));
+
+                std::cout << "Choosing particle with radius " << ghostRad << " meters and mass " << Particle::calcMass(ghostRad, 1) << "kg" << std::endl;
+                
 
                 // Calculate the necessary velocity.
-                double force = ghostRad * std::sqrt( 
-                    (Environment::GRAVITATIONAL_CONSTANT * (*orbitCenter).getMass() ) / dist );
+                double orbitalVelocity = std::sqrt( 
+                    (GRAVITATIONAL_CONSTANT * (*orbitCenter).getMass()) / distBetweenBodies );
 
                 // Create a MotionVector for the new particle.
                 MotionVector<double> newMot = MotionVector<double>(
-                    force * std::cos(orbitAngle),
-                    force * std::sin(orbitAngle)
+                    orbitalVelocity * std::cos(orbitAngle),
+                    orbitalVelocity * std::sin(orbitAngle)
                 );
 
                 // Place the particle.
-                env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot));
+                env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot + (*orbitCenter).getVelocity()));
             }
         }
 
@@ -319,7 +364,7 @@ int Sim::run()
 
         drawScreen();
 
-        // SDL_Delay(100);
+        SDL_Delay(16);
     }
     return 0;
 }

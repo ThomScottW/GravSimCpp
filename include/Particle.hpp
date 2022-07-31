@@ -3,6 +3,7 @@
 
 
 #include "MotionVector.hpp"
+#include "EnvConstants.hpp"
 
 
 class Particle
@@ -13,7 +14,7 @@ public:
         double x,
         double y,
         MotionVector<double> vec,
-        double density=0.15
+        double density=5500
     );
 
     // Return the x coordinate of this particle.
@@ -61,6 +62,9 @@ public:
 
     // Return the mass of this particle.
     double getMass();
+
+    // Return the motion vector that represents the velocity of this particle.
+    MotionVector<double> getVelocity();
 
     // Simulate the effect of elasticity by applying a force to the particle's
     // motion vector. The elasticity constant is defined by the environment.

@@ -42,8 +42,8 @@ void Particle::move()
     double dy = vec_mag * std::sin(vec_angle);
 
     // Move the particle by the calculated amounts.
-    x_pos += dx;
-    y_pos += dy;
+    x_pos += dx * (1.0 / 60.0);
+    y_pos += dy * (1.0 / 60.0);
 }
 
 
@@ -64,12 +64,14 @@ void Particle::accelerateTowards(double x, double y, double constant, double poi
     // This calculated force will be the magnitude of the vector that we'll add to this
     // particle's existing motion vector, simulating an acceleration towards the point.
     double force = (constant * mass * pointMass) / std::pow(dist, 2);
+    double acceleration = force / mass;
+    double deltaVel = acceleration * (1.0/60.0);
 
-    double forceXComp = std::cos(angleBetweenPoints) * force;
-    double forceYComp = std::sin(angleBetweenPoints) * force;
+    double velXComp = std::cos(angleBetweenPoints) * deltaVel;
+    double velYComp = std::sin(angleBetweenPoints) * deltaVel;
 
     // Add the force vector to this particle's motion vector.
-    MotionVector<double> forceVec(forceXComp, forceYComp);
+    MotionVector<double> forceVec(velXComp, velYComp);
     vec = vec + forceVec;
 }
 
@@ -191,6 +193,12 @@ double Particle::getRadius()
 double Particle::getMass()
 {
     return mass;
+}
+
+
+MotionVector<double> Particle::getVelocity()
+{
+    return vec;
 }
 
 

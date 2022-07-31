@@ -1,0 +1,62 @@
+#!/bin/bash
+
+
+# Bool value to decide if we want to run valgrind or not.
+RUN_MEMCHECK=0
+# Value that will help us decide what to run. By default it will run the main program,
+# which should be a.out.src.
+WHAT_TO_RUN=src
+
+# This series of if statements just figures out the command line arguments.
+if [ $# -eq 1 ]
+then
+    if [ $1 == "--memcheck" ]
+    then
+        RUN_MEMCHECK=1
+    else
+        WHAT_TO_RUN=$1
+    fi
+elif [ $# -eq 2 ]
+then
+    # Case where first argument is --memcheck.
+    if [ $1 == "--memcheck" ]
+    then
+        RUN_MEMCHECK=1
+        WHAT_TO_RUN=$2
+    # Case where --memcheck is not he first argument.
+    else
+        WHAT_TO_RUN=$1
+
+        # If it's not the first argument, it might be the second.
+        if [ $2 == "--memcheck" ]
+        then
+            RUN_MEMCHECK=1
+        fi
+    fi
+fi
+     
+
+# Get the directory this script is being run from.
+SCRIPT_DIR=$(readlink -m $(dirname $0))
+
+# Get the path to the executable we want to run.
+PROG_PATH=$SCRIPT_DIR/out/bin/a.out.$WHAT_TO_RUN
+# Require is a script that determines if the executable we're trying to run
+# exists in this project directory.
+$SCRIPT_DIR/require $WHAT_TO_RUN
+
+
+# If the executable exists, then we run it.
+if [ $? -eq 0 ]; then
+    # We also run valgrind, if the --memcheck option was given.
+    if [ $RUN_MEMCHECK -eq 1 ]; then
+        valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --track-origins=yes --log-file="log.txt" $PROG_PATH
+    else
+        $PROG_PATH
+    fi
+else
+    # If the require script failed, it means the executable doesn't exist.
+    echo "Could not find $WHAT_TO_RUN; have you successfully built?"
+    echo
+    exit 1
+fi

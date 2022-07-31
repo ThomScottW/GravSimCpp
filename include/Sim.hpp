@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <cstdlib>
 #include "Particle.hpp"
@@ -46,6 +47,9 @@ private:
 
     // Draw the screen.
     void drawScreen();
+
+    // Draw text to the screen.
+    void drawText(const char* text, int x, int y);
 
     // Generate a random Particle.
     Particle genParticle();

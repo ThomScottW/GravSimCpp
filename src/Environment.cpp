@@ -37,8 +37,8 @@ void Environment::update()
             if (pIt1 != pIt2)
             {
                 (*pIt1).accelerateTowards((*pIt2).x(), (*pIt2).y(),
-                 Environment::GRAVITATIONAL_CONSTANT, (*pIt2).getMass());
-                (*pIt1).coalesce(*pIt2, Environment::ELASTICITY_CONSTANT);
+                 GRAVITATIONAL_CONSTANT, (*pIt2).getMass());
+                (*pIt1).coalesce(*pIt2, ELASTICITY_CONSTANT);
             }
         }
     }

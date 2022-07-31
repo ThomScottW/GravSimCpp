@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include "Particle.hpp"
+#include "EnvConstants.hpp"
 
 
 class Environment
@@ -33,21 +34,15 @@ public:
     // Return a vector containing width and height of this environment.
     std::vector<unsigned> dimensions();
 
-    // double calcOrbitalVelocity(double m1, double m2, )
-
-    static constexpr double GRAVITATIONAL_CONSTANT = 0.0001;
-    static constexpr double ELASTICITY_CONSTANT = 0.9;
-
 
 private:
-
     // Returns true if particle p is out of bounds.
     bool isOutsideBounds(Particle p);
 
     unsigned numParticles;
     std::list<Particle> particles;
-    unsigned width = 1200;
-    unsigned height = 1200;
+    unsigned width = 1000;
+    unsigned height = 1000;
 
 };
 

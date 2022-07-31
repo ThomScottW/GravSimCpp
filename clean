@@ -1,0 +1,11 @@
+#!/bin/bash
+
+OUT_DIR=./out
+
+if [ -d "$OUT_DIR" ]
+then
+    rm -rf $OUT_DIR
+    echo "Removed out directory."
+else
+    echo "Nothing to clean. No ./out found."
+fi

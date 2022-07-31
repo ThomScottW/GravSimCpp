@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# This gets the full path for the directory this script is running in.
+SCRIPT_DIR=$(readlink -m $(dirname $0))
+OUT_DIR=$SCRIPT_DIR/out
+
+# Decide what to build.
+# This script will be run with 0 or 1 command line arguments. Such as "build" or "build gtest".
+if [ $# -lt 1 ]
+then
+    WHAT_TO_MAKE=
+elif [ $1 == "src" ]
+then
+    WHAT_TO_MAKE=a.out.src
+elif [ $1 == "exp" ]
+then
+    WHAT_TO_MAKE=a.out.exp
+elif [ $1  == "gtest" ]
+then
+    WHAT_TO_MAKE=a.out.gtest
+else
+    echo "Must build either src or gtest."
+    exit 1
+fi
+
+# If we could successfully decide what to build, then we need to run
+# cmake and build the executeable.
+
+# Make an out directory if one doesn't already exist. 
+mkdir -p $OUT_DIR
+
+# Change into the out_dir so that cmake's output goes in there.
+cd $OUT_DIR
+cmake $SCRIPT_DIR
+
+# If the last running process was successful (cmake), then
+# run the make command and build what we want.
+if [ $? -eq 0 ]
+then
+    make $WHAT_TO_MAKE
+fi

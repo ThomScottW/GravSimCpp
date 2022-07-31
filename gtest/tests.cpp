@@ -252,8 +252,8 @@ TEST(ParticleCoordinateTests, particlePositionChangesAfterMoving)
     Particle p1(radius, x, y, v1);
 
     std::vector<double> expectedPosition = {
-        x + v1.magnitude() * std::cos(v1.angle()),
-        y + v1.magnitude() * std::sin(v1.angle())
+        x + v1.magnitude() * std::cos(v1.angle()) * (1.0 / 60.0),
+        y + v1.magnitude() * std::sin(v1.angle()) * (1.0 / 60.0)
     };
 
     p1.move();
@@ -274,7 +274,7 @@ TEST(ParticleCoordinateTests, particlePositionChangesAfterSimpleMove)
     // Create the particle.
     Particle p1(radius, x, y, v1);
 
-    std::vector<double> expectedPosition = {6, 1};
+    std::vector<double> expectedPosition = {x + v1.x() / 60, 1};
 
     p1.move();
 

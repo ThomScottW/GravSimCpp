@@ -253,10 +253,6 @@ void Sim::drawScreen()
 }
 
 
-
-
-
-
 int Sim::run()
 {
     if (Init() == false)

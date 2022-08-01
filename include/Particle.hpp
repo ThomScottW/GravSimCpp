@@ -62,6 +62,9 @@ public:
     // Return true if the particle is frozen.
     bool isFrozen();
 
+    // Return true if this particle is one that interacts through gravity.
+    bool hasGravity();
+
     // Return the radius of a particle with a given mass.
     double static calcRad(double mass, double density);
 
@@ -85,6 +88,7 @@ public:
     void applyElasticity(double constant);
 
 
+
 // The protected keyword acts like private, but now derived classes
 // can modify these member variables directly.
 protected:
@@ -96,7 +100,7 @@ protected:
     double density;
     bool absorbed;
     bool fixed;
-    bool hasGravity;
+    bool hasGrav;
     SDL_Color color;
 };
 

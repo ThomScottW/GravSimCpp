@@ -18,10 +18,9 @@ public:
 
     virtual ~Attacker()=default;
 
-    void move() override;
+    void update(const std::list<Particle*>& particles) override;
 
-    // Choose a target to move towards.
-    void selectTarget(Particle* target);
+    void move() override;
 
     // Fire the weapon.
     void fire();
@@ -34,6 +33,7 @@ private:
     int weaponStrength;
     double angle;
     int lifespan;
+    int range;
 };
 
 #endif

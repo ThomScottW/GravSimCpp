@@ -17,7 +17,7 @@ Particle::Particle(
     density{density},
     absorbed{false},
     fixed{false},
-    hasGravity{gravity},
+    hasGrav{gravity},
     color{col}
 {
     mass = calcMass(radius, density);
@@ -41,7 +41,7 @@ void Particle::update(const std::list<Particle*>& particles)
     move();
     for (Particle* p : particles)
     {
-        if (p != this && p->hasGravity)
+        if (p != this && p->hasGravity())
         {
             accelerateTowards(p->x(), p->y(), GRAVITATIONAL_CONSTANT, p->getMass());
             coalesce(*p, ELASTICITY_CONSTANT);
@@ -193,6 +193,12 @@ void Particle::unFreeze()
 bool Particle::isFrozen()
 {
     return fixed;
+}
+
+
+bool Particle::hasGravity()
+{
+    return hasGrav;
 }
 
 

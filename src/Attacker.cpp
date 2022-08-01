@@ -6,8 +6,9 @@ Attacker::Attacker(double x, double y)
         5,
         x, y,
         MotionVector<double>(0, 0),
-        SDL_Color{255, 0, 0}
-    }, weaponStrength{1}
+        SDL_Color{255, 0, 0},
+        false  // No gravity
+    }, target{nullptr}, weaponStrength{1}, angle{-1}, lifespan{100}
 {
 }
 
@@ -19,9 +20,25 @@ void Attacker::move()
         return;
     }
 
-    // Choose a random angle.
-    double angle = std::fmod(std::rand(), 2 * 3.14);
+    // If there is no target, then move randomly.
+    if (nullptr == target)
+    {
+        if (angle < 0) // If the angle hasn't been initialized yet.
+        {
+            // Choose a random angle.
+            angle = std::fmod(std::rand(), 2 * 3.14);
+        }
+        else
+        {
+            int chance = std::rand() % 100;
 
+            if (chance < 20)
+            {
+                angle = std::fmod(std::rand(), 2 * 3.14);
+            }
+        }
+    }
+    
     int magnitude = 50;
 
     double dx = magnitude * std::cos(angle);
@@ -32,9 +49,9 @@ void Attacker::move()
 }
 
 
-void Attacker::selectTarget(std::list<Particle> particles)
+void Attacker::selectTarget(Particle* target)
 {
-    return;
+    target = target;
 }
 
 

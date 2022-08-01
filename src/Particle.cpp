@@ -7,6 +7,7 @@ Particle::Particle(
     double y,
     MotionVector<double> vec,
     SDL_Color col,
+    bool gravity,
     double density
 )
     : rad{radius},
@@ -16,6 +17,7 @@ Particle::Particle(
     density{density},
     absorbed{false},
     fixed{false},
+    hasGravity{gravity},
     color{col}
 {
     mass = calcMass(radius, density);
@@ -31,6 +33,20 @@ double Particle::x()
 double Particle::y()
 {
     return y_pos;
+}
+
+
+void Particle::update(const std::list<Particle*>& particles)
+{
+    move();
+    for (Particle* p : particles)
+    {
+        if (p != this && p->hasGravity)
+        {
+            accelerateTowards(p->x(), p->y(), GRAVITATIONAL_CONSTANT, p->getMass());
+            coalesce(*p, ELASTICITY_CONSTANT);
+        }
+    }
 }
 
 

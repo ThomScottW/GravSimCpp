@@ -2,10 +2,12 @@
 #define PARTICLE_HPP
 
 
-#include "MotionVector.hpp"
-#include "EnvConstants.hpp"
+#include <iostream>
+#include <list>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include "MotionVector.hpp"
+#include "EnvConstants.hpp"
 
 
 class Particle
@@ -17,14 +19,20 @@ public:
         double y,
         MotionVector<double> vec,
         SDL_Color col=SDL_Color{255, 255, 255},
+        bool gravity=true,
         double density=5500
     );
+
+    virtual ~Particle()=default;
 
     // Return the x coordinate of this particle.
     double x();
 
     // Return the y coordinate of this particle.
     double y();
+
+    // Move and accelerate towards other particles.
+    virtual void update(const std::list<Particle*>& particles);
     
     // Move the particle based on its vector's direction and speed.
     virtual void move();
@@ -88,6 +96,7 @@ protected:
     double density;
     bool absorbed;
     bool fixed;
+    bool hasGravity;
     SDL_Color color;
 };
 

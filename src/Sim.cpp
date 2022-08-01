@@ -170,12 +170,6 @@ void Sim::drawParticles()
         drawSDLCircle(p->x(), p->y(), p->getRadius(), true, p->getColor());
     }
 
-    // Draw particles that don't interact through gravity.
-    for (Particle* p : env.getNonGravityParticles())
-    {
-        drawSDLCircle((*p).x(), (*p).y(), (*p).getRadius(), true, (*p).getColor());
-    }
-
     if (showGhostParticle || choosingOrbit)
     {
         drawSDLCircle(mouseX, mouseY, ghostRad, true, SDL_Color{100, 100, 100});
@@ -372,7 +366,7 @@ int Sim::run()
             else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_a)
             {
                 // Place an attacker, false sets gravity to be off.
-                env.placeParticle(new Attacker(mouseX, mouseY), false);
+                env.placeParticle(new Attacker(mouseX, mouseY));
             }
         }
 

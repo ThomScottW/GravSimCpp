@@ -9,9 +9,9 @@ class A
 public:
     A()=default;
 
-    ~A()=default;
+    virtual ~A()=default;
 
-    virtual void move() {std::cout << "A::move()" << std::endl;}
+    virtual void move() {std::cout << "A::move()" << this << std::endl;}
 };
 
 
@@ -21,7 +21,7 @@ class B : public A
 {
 public:
     B() {};
-    ~B()=default;
+    virtual ~B()=default;
 
     void move() override {std::cout << "B::move()" << std::endl;}
 };
@@ -36,9 +36,25 @@ int main()
     std::vector<A*> vec = {};
 
 
-    A a = A();
 
-    vec.push_back(&a);
+    A* ap = new A();
+
+    vec.push_back(ap);
     
+    while (!vec.empty())
+    {
+        delete vec.back();
+        vec.pop_back();
+    }
+
+
+    A* bp = new A();
+
+    A* cp = bp;
+
+    bp->move();
+
+    std::cout << bp << std::endl;
+    std::cout << cp << std::endl;
     
 }

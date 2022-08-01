@@ -16,10 +16,12 @@ public:
         double y
     );
 
+    virtual ~Attacker()=default;
+
     void move() override;
 
     // Choose a target to move towards.
-    void selectTarget(std::list<Particle> particles);
+    void selectTarget(Particle* target);
 
     // Fire the weapon.
     void fire();
@@ -28,7 +30,10 @@ private:
     // Increase the weapon strength by a certain amount.
     void increaseWeaponStrength(int amount);
 
+    Particle* target;
     int weaponStrength;
+    double angle;
+    int lifespan;
 };
 
 #endif

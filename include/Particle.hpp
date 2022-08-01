@@ -4,6 +4,8 @@
 
 #include "MotionVector.hpp"
 #include "EnvConstants.hpp"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 
 class Particle
@@ -66,6 +68,9 @@ public:
     // Return the motion vector that represents the velocity of this particle.
     MotionVector<double> getVelocity();
 
+    // Return an SDL_Color struct representing the r, g, and b values of this particle's color.
+    SDL_Color getColor();
+
     // Simulate the effect of elasticity by applying a force to the particle's
     // motion vector. The elasticity constant is defined by the environment.
     void applyElasticity(double constant);
@@ -80,6 +85,7 @@ private:
     double density;
     bool absorbed;
     bool fixed;
+    SDL_Color color;
 };
 
 

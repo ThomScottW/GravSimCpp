@@ -26,7 +26,6 @@ public:
     // Runs an SDL game loop.
     int run();
 
-  
     
 
 private:
@@ -38,7 +37,7 @@ private:
 
     // Draw an SDL circle at the given x and y coordinates, with a 
     // specified radius and opacity.
-    void drawSDLCircle(double x, double y, double radius, bool filled, int r=255, int g=255, int b=255);
+    void drawSDLCircle(double x, double y, double radius, bool filled, SDL_Color color);
 
     // Given points xc and yc for the center of a circle, and points x y
     // on the edge of the circle, draw the corresponding points in all 8 octants,

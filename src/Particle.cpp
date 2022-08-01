@@ -8,7 +8,14 @@ Particle::Particle(
     MotionVector<double> vec,
     double density
 )
-    : rad{radius}, x_pos{x}, y_pos{y}, vec{vec}, density{density}, absorbed{false}, fixed{false}
+    : rad{radius},
+    x_pos{x},
+    y_pos{y},
+    vec{vec},
+    density{density},
+    absorbed{false},
+    fixed{false},
+    color{255, 255, 255}
 {
     mass = calcMass(radius, density);
 }
@@ -199,6 +206,12 @@ double Particle::getMass()
 MotionVector<double> Particle::getVelocity()
 {
     return vec;
+}
+
+
+SDL_Color Particle::getColor()
+{
+    return color;
 }
 
 

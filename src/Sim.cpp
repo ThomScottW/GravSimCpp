@@ -132,9 +132,9 @@ void Sim::drawCirclePixels(double xc, double yc, double x, double y, bool filled
 }
 
 
-void Sim::drawSDLCircle(double h, double k, double radius, bool filled, int r, int g, int b)
+void Sim::drawSDLCircle(double h, double k, double radius, bool filled, SDL_Color color)
 {
-    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, 255);
 
     double x = 0;
     double y = radius;
@@ -167,12 +167,12 @@ void Sim::drawParticles()
 {
     for (Particle p : env.getParticles())
     {
-        drawSDLCircle(p.x(), p.y(), p.getRadius(), true);
+        drawSDLCircle(p.x(), p.y(), p.getRadius(), true, p.getColor());
     }
 
     if (showGhostParticle || choosingOrbit)
     {
-        drawSDLCircle(mouseX, mouseY, ghostRad, true, 100, 100, 100);
+        drawSDLCircle(mouseX, mouseY, ghostRad, true, SDL_Color{100, 100, 100});
         addText(std::to_string((int)ghostRad), mouseX, mouseY - 30);
     }
 
@@ -185,7 +185,7 @@ void Sim::drawParticles()
             (*orbitCenter).y(),
             std::hypot(mouseX - (*orbitCenter).x(), mouseY - (*orbitCenter).y()),
             false,
-            100, 100, 100
+            SDL_Color{100, 100, 100}
         );
 
         // Then, draw a circle, centered at the mouse cursor.

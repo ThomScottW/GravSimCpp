@@ -200,7 +200,6 @@ void Sim::addText(std::string text, int x, int y)
 }
 
 
-
 // Draw text to the screen.
 void Sim::drawText(const char* text, int x, int y) const
 {

@@ -16,6 +16,7 @@ Sim::Sim(unsigned numParticles)
     mouseY{-1},
     ghostRad{5},
     showGhostParticle{false},
+    fontSize{10},
     frozenP{nullptr},
     choosingOrbit{false}
 {
@@ -31,12 +32,13 @@ Sim::~Sim()
         ren = nullptr;
     }
     
-    if (ren)
+    if (win)
     {
         SDL_DestroyWindow(win);
         win = nullptr;
     }
 
+    TTF_Quit();
     SDL_Quit();
 }
 
@@ -57,7 +59,7 @@ bool Sim::Init()
         SDL_WINDOWPOS_CENTERED,
         env.dimensions().at(0),
         env.dimensions().at(1),
-        SDL_WINDOW_SHOWN // Not sure what this one does? Can use | to add more flags.
+        SDL_WINDOW_SHOWN
     );
 
     if (nullptr == win)
@@ -74,7 +76,7 @@ bool Sim::Init()
 
     if (nullptr == ren)
     {
-        std::cout << "Renderer Creation Error: " << SDL_GetError() << std::endl;
+        std::cerr << "Renderer Creation Error: " << SDL_GetError() << std::endl;
         return false;
     }
 
@@ -83,7 +85,7 @@ bool Sim::Init()
     // Init text.
     if (TTF_Init() < 0)
     {
-        std::cout << "Error: " << TTF_GetError() << std::endl;
+        std::cerr << "Failed to initialize SDL_TTF: " << TTF_GetError() << std::endl;
     }
 
     return true;
@@ -171,6 +173,7 @@ void Sim::drawParticles()
     if (showGhostParticle || choosingOrbit)
     {
         drawSDLCircle(mouseX, mouseY, ghostRad, true, 100, 100, 100);
+        addText(std::to_string((int)ghostRad), mouseX, mouseY - 30);
     }
 
     if (choosingOrbit)
@@ -190,9 +193,16 @@ void Sim::drawParticles()
 }
 
 
+void Sim::addText(std::string text, int x, int y)
+{
+    Text t{text, x, y};
+    texts.push_back(t);
+}
+
+
 
 // Draw text to the screen.
-void Sim::drawText(const char* text, int x, int y)
+void Sim::drawText(const char* text, int x, int y) const
 {
     TTF_Font* font = TTF_OpenFont("/home/scotttw/Projects/GravSim/grav.ttf", 20);
 
@@ -203,7 +213,6 @@ void Sim::drawText(const char* text, int x, int y)
     }
 
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, {255, 255, 255});
-
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(ren, textSurface);
 
     SDL_Rect textRect;
@@ -211,7 +220,6 @@ void Sim::drawText(const char* text, int x, int y)
     textRect.y = y;
 
     SDL_QueryTexture(textTexture, NULL, NULL, &textRect.w, &textRect.h);
-
 
     SDL_RenderCopy(ren, textTexture, NULL, &textRect);
 
@@ -232,8 +240,13 @@ void Sim::drawScreen()
     drawParticles();
 
     // Draw text.
-    drawText("hi", 1, 1);
-
+    for (auto it = texts.begin(); it != texts.end();)
+    {
+        // The SDL function to render text requires a const char*.
+        // The .c_str() method converts from std::string to const char*.
+        drawText((*it).t.c_str(), (*it).x, (*it).y);
+        it = texts.erase(it);
+    }
 
     // Then present the completed frame.
     SDL_RenderPresent(ren);

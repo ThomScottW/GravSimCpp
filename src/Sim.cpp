@@ -165,15 +165,15 @@ void Sim::drawSDLCircle(double h, double k, double radius, bool filled, SDL_Colo
 
 void Sim::drawParticles()
 {
-    for (Particle p : env.getParticles())
+    for (Particle* p : env.getParticles())
     {
-        drawSDLCircle(p.x(), p.y(), p.getRadius(), true, p.getColor());
+        drawSDLCircle(p->x(), p->y(), p->getRadius(), true, p->getColor());
     }
 
     // Draw particles that don't interact through gravity.
-    for (Particle p : env.getNonGravityParticles())
+    for (Particle* p : env.getNonGravityParticles())
     {
-        drawSDLCircle(p.x(), p.y(), p.getRadius(), true, p.getColor());
+        drawSDLCircle((*p).x(), (*p).y(), (*p).getRadius(), true, (*p).getColor());
     }
 
     if (showGhostParticle || choosingOrbit)
@@ -289,7 +289,7 @@ int Sim::run()
                 else if (Event.button.button == SDL_BUTTON_RIGHT && showGhostParticle)
                 {
                     MotionVector<double> newMot = MotionVector<double>(0, 0);
-                    env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot));
+                    env.placeParticle(new Particle(ghostRad, mouseX, mouseY, newMot));
                 }
             }
             else if (Event.type == SDL_MOUSEMOTION)
@@ -363,7 +363,7 @@ int Sim::run()
                 );
 
                 // Place the particle.
-                env.placeParticle(Particle(
+                env.placeParticle(new Particle(
                     ghostRad,
                     mouseX, mouseY,
                     newMot + (*orbitCenter).getVelocity()
@@ -372,7 +372,7 @@ int Sim::run()
             else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_a)
             {
                 // Place an attacker, false sets gravity to be off.
-                env.placeParticle(Attacker(mouseX, mouseY), false);
+                env.placeParticle(new Attacker(mouseX, mouseY), false);
             }
         }
 

@@ -4,8 +4,8 @@
 Environment::Environment(unsigned numParticles)
     : numParticles{numParticles}
 {
-    particles = std::list<Particle>();
-    nonAttracted = std::list<Particle>();
+    particles = std::list<Particle*>();
+    nonAttracted = std::list<Particle*>();
 
     for (unsigned i = 0; i < numParticles; ++i){
         particles.push_back(genRandomParticle());
@@ -18,7 +18,7 @@ void Environment::update()
     // Remove any absorbed particles, or particles outside the screen.
     for (auto it = particles.begin(); it != particles.end();)
     {
-        if ((*it).isAbsorbed() || isOutsideBounds(*it))
+        if ((*it)->isAbsorbed() || isOutsideBounds(*(*it)))
         {
             it = particles.erase(it);
         }
@@ -31,29 +31,28 @@ void Environment::update()
     // Gravity.
     for (auto pIt1 = particles.begin(); pIt1 != particles.end(); ++pIt1)
     {
-        (*pIt1).move();
+        (*pIt1)->move();
 
         for (auto pIt2 = particles.begin(); pIt2 != particles.end(); ++pIt2)
         {
             if (pIt1 != pIt2)
             {
-                (*pIt1).accelerateTowards((*pIt2).x(), (*pIt2).y(),
-                 GRAVITATIONAL_CONSTANT, (*pIt2).getMass());
-                (*pIt1).coalesce(*pIt2, ELASTICITY_CONSTANT);
+                (*pIt1)->accelerateTowards((*pIt2)->x(), (*pIt2)->y(),
+                 GRAVITATIONAL_CONSTANT, (*pIt2)->getMass());
+                (*pIt1)->coalesce(*(*pIt2), ELASTICITY_CONSTANT);
             }
         }
     }
 
     // Move any particles unaffected by gravity.
-    for (Particle p : nonAttracted)
+    for (Particle* p : nonAttracted)
     {
-        std::cout << " Moving in here! " << std::endl;
-        p.move();
+        (*p).move();
     }
 }
 
 
-Particle Environment::genRandomParticle()
+Particle* Environment::genRandomParticle()
 {
     double radius = std::rand() % 5 + 1;
 
@@ -64,11 +63,11 @@ Particle Environment::genRandomParticle()
     // 0 Motion Vector.
     MotionVector<double> vec = MotionVector<double>(0, 0);
 
-    return Particle(radius, x, y, vec);
+    return new Particle(radius, x, y, vec);
 }
 
 
-void Environment::placeParticle(Particle p, bool gravity)
+void Environment::placeParticle(Particle* p, bool gravity)
 {
     if (gravity)
     {
@@ -86,9 +85,9 @@ Particle* Environment::findParticle(double x, double y)
 {
     for (auto it = particles.begin(); it != particles.end(); ++it)
     {
-        if (std::hypot(x - (*it).x(), y - (*it).y()) <= (*it).getRadius())
+        if (std::hypot(x - (*it)->x(), y - (*it)->y()) <= (*it)->getRadius())
         {
-            return &(*it);
+            return (*it);
         }
     }
 
@@ -96,13 +95,13 @@ Particle* Environment::findParticle(double x, double y)
 }
 
 
-std::list<Particle>& Environment::getParticles()
+std::list<Particle*>& Environment::getParticles()
 {
     return particles;
 }
 
 
-std::list<Particle>& Environment::getNonGravityParticles()
+std::list<Particle*>& Environment::getNonGravityParticles()
 {
     return nonAttracted;
 }

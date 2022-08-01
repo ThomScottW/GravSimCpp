@@ -14,8 +14,6 @@ Attacker::Attacker(double x, double y)
 
 void Attacker::move()
 {
-    std::cout << "Attacker moving";
-
     if (fixed)
     {
         return;
@@ -24,7 +22,7 @@ void Attacker::move()
     // Choose a random angle.
     double angle = std::fmod(std::rand(), 2 * 3.14);
 
-    int magnitude = 500;
+    int magnitude = 50;
 
     double dx = magnitude * std::cos(angle);
     double dy = magnitude * std::sin(angle);

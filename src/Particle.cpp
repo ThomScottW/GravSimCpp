@@ -6,6 +6,7 @@ Particle::Particle(
     double x,
     double y,
     MotionVector<double> vec,
+    SDL_Color col,
     double density
 )
     : rad{radius},
@@ -15,7 +16,7 @@ Particle::Particle(
     density{density},
     absorbed{false},
     fixed{false},
-    color{255, 255, 255}
+    color{col}
 {
     mass = calcMass(radius, density);
 }

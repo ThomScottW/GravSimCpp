@@ -170,6 +170,12 @@ void Sim::drawParticles()
         drawSDLCircle(p.x(), p.y(), p.getRadius(), true, p.getColor());
     }
 
+    // Draw particles that don't interact through gravity.
+    for (Particle p : env.getNonGravityParticles())
+    {
+        drawSDLCircle(p.x(), p.y(), p.getRadius(), true, p.getColor());
+    }
+
     if (showGhostParticle || choosingOrbit)
     {
         drawSDLCircle(mouseX, mouseY, ghostRad, true, SDL_Color{100, 100, 100});
@@ -187,8 +193,6 @@ void Sim::drawParticles()
             false,
             SDL_Color{100, 100, 100}
         );
-
-        // Then, draw a circle, centered at the mouse cursor.
     }
 }
 
@@ -344,14 +348,9 @@ int Sim::run()
                 orbitAngle = std::fmod(orbitAngle - 0.5 * M_PI, 2 * M_PI);
 
                 // Distance between mouse and orbitCenter.
-                // double orbiterMass = Particle::calcMass(ghostRad, 1);
                 double distBetweenBodies = std::hypot(mouseX - ocX, mouseY - ocY);
-                // double massSum = orbiterMass + (*orbitCenter).getMass();
-
-                // double baryDist = distBetweenBodies - ((distBetweenBodies * orbiterMass) / (massSum));
 
                 std::cout << "Choosing particle with radius " << ghostRad << " meters and mass " << Particle::calcMass(ghostRad, 1) << "kg" << std::endl;
-                
 
                 // Calculate the necessary velocity.
                 double orbitalVelocity = std::sqrt( 
@@ -364,7 +363,16 @@ int Sim::run()
                 );
 
                 // Place the particle.
-                env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot + (*orbitCenter).getVelocity()));
+                env.placeParticle(Particle(
+                    ghostRad,
+                    mouseX, mouseY,
+                    newMot + (*orbitCenter).getVelocity()
+                ));
+            }
+            else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_a)
+            {
+                // Place an attacker, false sets gravity to be off.
+                env.placeParticle(Attacker(mouseX, mouseY), false);
             }
         }
 

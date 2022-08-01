@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdlib>
 #include "Particle.hpp"
+#include "Attacker.hpp"
 #include "Environment.hpp"
 
 

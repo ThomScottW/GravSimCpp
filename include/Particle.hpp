@@ -16,6 +16,7 @@ public:
         double x,
         double y,
         MotionVector<double> vec,
+        SDL_Color col=SDL_Color{255, 255, 255},
         double density=5500
     );
 
@@ -26,7 +27,7 @@ public:
     double y();
     
     // Move the particle based on its vector's direction and speed.
-    void move();
+    virtual void move();
 
     // Accelrate this particle towards a point.
     void accelerateTowards(double x, double y, double constant, double pointMass=1);
@@ -76,7 +77,9 @@ public:
     void applyElasticity(double constant);
 
 
-private:
+// The protected keyword acts like private, but now derived classes
+// can modify these member variables directly.
+protected:
     double rad;
     double x_pos;
     double y_pos;

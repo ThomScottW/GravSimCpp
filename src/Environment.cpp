@@ -5,6 +5,7 @@ Environment::Environment(unsigned numParticles)
     : numParticles{numParticles}
 {
     particles = std::list<Particle>();
+    nonAttracted = std::list<Particle>();
 
     for (unsigned i = 0; i < numParticles; ++i){
         particles.push_back(genRandomParticle());
@@ -42,6 +43,13 @@ void Environment::update()
             }
         }
     }
+
+    // Move any particles unaffected by gravity.
+    for (Particle p : nonAttracted)
+    {
+        std::cout << " Moving in here! " << std::endl;
+        p.move();
+    }
 }
 
 
@@ -60,9 +68,17 @@ Particle Environment::genRandomParticle()
 }
 
 
-void Environment::placeParticle(Particle p)
+void Environment::placeParticle(Particle p, bool gravity)
 {
-    particles.push_back(p);
+    if (gravity)
+    {
+        particles.push_back(p);
+    }
+    else
+    {
+        nonAttracted.push_back(p);
+    }
+    
 }
 
 
@@ -83,6 +99,12 @@ Particle* Environment::findParticle(double x, double y)
 std::list<Particle>& Environment::getParticles()
 {
     return particles;
+}
+
+
+std::list<Particle>& Environment::getNonGravityParticles()
+{
+    return nonAttracted;
 }
 
 

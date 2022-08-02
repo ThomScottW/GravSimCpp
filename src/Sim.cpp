@@ -168,6 +168,10 @@ void Sim::drawParticles()
     for (Particle* p : env.getParticles())
     {
         drawSDLCircle(p->x(), p->y(), p->getRadius(), true, p->getColor());
+        if (!(p->hasGravity()))
+        {
+            drawParticleEffects(p);
+        }
     }
 
     if (showGhostParticle || choosingOrbit)
@@ -187,6 +191,88 @@ void Sim::drawParticles()
             false,
             SDL_Color{100, 100, 100}
         );
+    }
+}
+
+
+void Sim::drawParticleEffects(Particle* p)
+{
+
+    Attacker* a = (Attacker*)p;
+    if (a->lockedOn())
+    {
+        SDL_SetRenderDrawColor(ren, 255, 200, 100, 255);
+        Particle* t = a->getTarget();
+        double tx = t->x();
+        double ty = t->y();
+        double dy = ty - a->y();
+        double dx = tx - a->x();
+        double angle = std::atan2(dy, dx);
+        // double tangentLower = angle + PI / 2;
+        // double tangentHigher = angle - PI / 2;
+
+        drawAttackerLaser(20, angle, a->x(), a->y(), tx, ty);
+
+        // if (a->getWeaponStrength() > 20)
+        // {
+        //     // Draw tier 2 laser.
+        //     drawAttackerLaser(2, angle, a->x(), a->y(), tx, ty);
+        // }
+        // else if (a->getWeaponStrength() > 40)
+        // {
+        //     // Draw tier 3 laser.
+        //     drawAttackerLaser(3, angle, a->x(), a->y(), tx, ty);
+        // }
+        // else if (a->getWeaponStrength() > 60)
+        // {
+        //     // Draw tier 4 laser.
+        //     drawAttackerLaser(4, angle, a->x(), a->y(), tx, ty);
+        // }
+        // else if (a->getWeaponStrength() > 80)
+        // {
+        //     // Draw tier 5 laser.
+        //     drawAttackerLaser(5, angle, a->x(), a->y(), tx, ty);
+        // }
+        // else if (a->getWeaponStrength() > 100)
+        // {
+        //     SDL_SetRenderDrawColor(ren, 255, 200, 200, 255);
+        //     // Draw tier 6 laser.
+        //     drawAttackerLaser(6, angle, a->x(), a->y(), tx, ty);
+        // }
+
+        // SDL_RenderDrawLine(ren, a->x(), a->y(), t->x(), t->y());
+
+        // angle
+        
+    }
+}
+
+
+
+
+void Sim::drawAttackerLaser(int tier, double angle, double ax, double ay, double tx, double ty)
+{
+    double tangentLower = angle + PI / 2;
+    double tangentHigher = angle - PI / 2;
+
+    if (tier == 1)
+    {
+        SDL_RenderDrawLine(ren, ax, ay, tx, ty);
+    }
+    else
+    {
+        double exL = tx + std::cos(tangentLower) * tier;
+        double eyL = ty + std::sin(tangentLower) * tier;
+        double exH = tx + std::cos(tangentHigher) * tier;
+        double eyH = ty + std::sin(tangentHigher) * tier;
+
+        SDL_RenderDrawLine(ren, ax, ay, tx, ty);
+        SDL_RenderDrawLine(ren, ax, ay, exL, eyL);
+        SDL_RenderDrawLine(ren, ax, ay, exH, eyH);
+
+
+        // std::cout << "Placed lower point at " << exL << ", " << eyL << std::endl;
+        // std::cout << "Placed higher point at " << exH << ", " << eyH << std::endl;
     }
 }
 

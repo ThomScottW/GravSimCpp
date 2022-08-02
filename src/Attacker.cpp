@@ -8,7 +8,7 @@ Attacker::Attacker(double x, double y)
         MotionVector<double>(0, 0),
         SDL_Color{255, 0, 0},
         false  // No gravity
-    }, target{nullptr}, weaponStrength{1}, angle{-1}, lifespan{100}, range{200}
+    }, target{nullptr}, ws{1}, angle{-1}, lifespan{100}, range{200}
 {
 }
 
@@ -80,7 +80,7 @@ void Attacker::move()
         angle = std::atan2(dy, dx);
     }
     
-    int magnitude = 50;
+    int magnitude = 25;
 
     double dx = magnitude * std::cos(angle);
     double dy = magnitude * std::sin(angle);
@@ -93,6 +93,18 @@ void Attacker::move()
 }
 
 
+bool Attacker::lockedOn()
+{
+    return (nullptr != target) && (distanceFrom(target->x(), target->y()) <= range);
+}
+
+
+int Attacker::getWeaponStrength()
+{
+    return ws;
+}
+
+
 void Attacker::fire()
 {
     return;
@@ -101,5 +113,12 @@ void Attacker::fire()
 
 void Attacker::increaseWeaponStrength(int amount)
 {
-    weaponStrength += 1;
+    ws += 1;
+}
+
+
+// Return a pointer to the target, if there is one.
+Particle* Attacker::getTarget()
+{
+    return target;
 }

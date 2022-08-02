@@ -46,8 +46,8 @@ private:
 
     unsigned numParticles;
     std::list<Particle*> particles;
-    unsigned width = 1000;
-    unsigned height = 1000;
+    unsigned width = 1300;
+    unsigned height = 1200;
 
 };
 

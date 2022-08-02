@@ -22,15 +22,22 @@ public:
 
     void move() override;
 
+    bool lockedOn();
+
+    int getWeaponStrength();
+
     // Fire the weapon.
     void fire();
+
+    // Return a pointer to the target, if there is one.
+    Particle* getTarget();
 
 private:
     // Increase the weapon strength by a certain amount.
     void increaseWeaponStrength(int amount);
 
     Particle* target;
-    int weaponStrength;
+    int ws;
     double angle;
     int lifespan;
     int range;

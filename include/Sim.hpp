@@ -48,6 +48,12 @@ private:
     // Draw all the particles to the screen.
     void drawParticles();
 
+    // Draw effects for particles that have them.
+    void drawParticleEffects(Particle* p);
+
+    // Draw a laser depending on how powerful it is.
+    void drawAttackerLaser(int tier, double angle, double ax, double ay, double tx, double ty);
+
     // Draw the screen.
     void drawScreen();
 

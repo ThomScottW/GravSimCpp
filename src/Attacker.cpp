@@ -16,6 +16,7 @@ Attacker::Attacker(double x, double y)
 void Attacker::update(const std::list<Particle*>& particles)
 {
     move();
+    increaseWeaponStrength(0.5);
 
     if (nullptr != target)
     {
@@ -23,6 +24,7 @@ void Attacker::update(const std::list<Particle*>& particles)
         if (distanceFrom(target->x(), target->y()) > range + 100)
         {
             target = nullptr;
+            ws = 1;
         }
         return;
     }
@@ -111,9 +113,9 @@ void Attacker::fire()
 }
 
 
-void Attacker::increaseWeaponStrength(int amount)
+void Attacker::increaseWeaponStrength(double amount)
 {
-    ws += 1;
+    ws += ws <= 100 ? 0.25 : 0;
 }
 
 

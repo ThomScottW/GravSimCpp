@@ -34,10 +34,10 @@ public:
 
 private:
     // Increase the weapon strength by a certain amount.
-    void increaseWeaponStrength(int amount);
+    void increaseWeaponStrength(double amount);
 
     Particle* target;
-    int ws;
+    double ws;
     double angle;
     int lifespan;
     int range;

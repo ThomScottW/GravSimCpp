@@ -226,6 +226,12 @@ double Particle::getMass()
 }
 
 
+void Particle::changeMass(double amount)
+{
+    mass += amount;
+}
+
+
 MotionVector<double> Particle::getVelocity()
 {
     return vec;

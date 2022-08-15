@@ -16,7 +16,7 @@ Attacker::Attacker(double x, double y)
 void Attacker::update(const std::list<Particle*>& particles)
 {
     move();
-    increaseWeaponStrength(0.5);
+    increaseWeaponStrength(0.25);
 
     if (nullptr != target)
     {
@@ -25,6 +25,11 @@ void Attacker::update(const std::list<Particle*>& particles)
         {
             target = nullptr;
             ws = 1;
+        }
+        // If it is nearby and the attacker is locked on, inflict damage.
+        else if (lockedOn())
+        {
+            
         }
         return;
     }
@@ -115,7 +120,7 @@ void Attacker::fire()
 
 void Attacker::increaseWeaponStrength(double amount)
 {
-    ws += ws <= 100 ? 0.25 : 0;
+    ws += ws <= 100 ? amount : 0;
 }
 
 

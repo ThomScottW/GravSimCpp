@@ -77,6 +77,9 @@ public:
     // Return the mass of this particle.
     double getMass();
 
+    // Change the mass of this particle by a set amount.
+    void changeMass(double amount);
+
     // Return the motion vector that represents the velocity of this particle.
     MotionVector<double> getVelocity();
 

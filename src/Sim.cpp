@@ -260,10 +260,6 @@ void Sim::drawAttackerLaser(int tier, double angle, double ax, double ay, double
         SDL_RenderDrawLine(ren, ax, ay, exH, eyH);
         --tier;
     }
-        
-
-        
-        
 }
 
 

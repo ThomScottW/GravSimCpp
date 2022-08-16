@@ -11,6 +11,7 @@ Particle::Particle(
     double density
 )
     : rad{radius},
+    oriRad{radius},
     x_pos{x},
     y_pos{y},
     vec{vec},
@@ -21,6 +22,10 @@ Particle::Particle(
     color{col}
 {
     mass = calcMass(radius, density);
+    oriMass = mass;
+
+
+    std::cout << "Particle created with mass " << mass << " kg." << std::endl;
 }
 
 
@@ -36,9 +41,10 @@ double Particle::y()
 }
 
 
-void Particle::update(const std::list<Particle*>& particles)
+void Particle::update(std::list<Particle*>& particles)
 {
     move();
+    rad = calcRad(mass, density);
     for (Particle* p : particles)
     {
         if (p != this && p->hasGravity())
@@ -158,6 +164,59 @@ void Particle::coalesce(Particle& p2, double constant)
 }
 
 
+void Particle::explode(std::list<Particle*>& particles)
+{
+    if (oriRad < 3)
+    {
+        return;
+    }
+
+    double fragmentAngle;
+    int fragmentVelocity = 100;
+    int fragmentRadius;
+    double fragmentX;
+    double fragmentY;
+    double xLBound = x_pos - (oriRad / 2);
+    double xHBound = x_pos + (oriRad / 2);
+    double yLBound = y_pos - (oriRad / 2);
+    double yHBound = y_pos + (oriRad / 2);
+
+    for (int i = 0; i < oriRad; ++i)
+    {
+        fragmentAngle = std::fmod(std::rand(), 2 * 3.14);
+        MotionVector<double> fragMot = MotionVector<double>(
+            fragmentVelocity* std::cos(fragmentAngle),
+            fragmentVelocity* std::sin(fragmentAngle)
+        );
+        if (oriRad < 25)
+        {
+            fragmentRadius = 1;
+        }
+        else if (oriRad < 50)
+        {
+            fragmentRadius = 1 + std::rand() % 2;
+        }
+        else
+        {
+            fragmentRadius = 1 + std::rand() % 3;
+        }
+        
+        fragmentX = xLBound + std::fmod(std::rand(), xHBound - xLBound);
+        fragmentY = yLBound + std::fmod(std::rand(), yHBound - yLBound);
+
+        std::cout << "Generated (" << fragmentX << ", " << fragmentY << ")" << std::endl;
+        std::cout << "This is between x: [" << xLBound << ", " << xHBound << "] y: [" << yLBound << ", " << yHBound << "]" << std::endl;
+
+        particles.push_back(new Particle(
+            fragmentRadius,
+            fragmentX,
+            fragmentY,
+            fragMot + vec
+        ));
+    }
+}
+
+
 double Particle::distanceFrom(double x, double y)
 {
     return std::hypot(x - x_pos, y - y_pos);
@@ -240,6 +299,11 @@ MotionVector<double> Particle::getVelocity()
 
 SDL_Color Particle::getColor()
 {
+    double percOriMass = mass / oriMass;
+    Uint8 blueVal = 255 * percOriMass;
+    Uint8 greenVal = (255 + blueVal) / 2;
+    color.b = blueVal;
+    color.g = greenVal;
     return color;
 }
 

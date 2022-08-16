@@ -25,11 +25,21 @@ Environment::~Environment()
 
 void Environment::update()
 {
-    // Remove any absorbed particles, or particles outside the screen.
+    for (Particle* p : particles)
+    {
+        p->update(particles);
+    }
+    
+
+    // Remove any absorbed particles, particles outside the screen, or particles with no mass.
     for (auto it = particles.begin(); it != particles.end();)
     {
-        if ((*it)->isAbsorbed() || isOutsideBounds(*(*it)))
+        if ((*it)->isAbsorbed() || isOutsideBounds(*(*it)) || (*it)->getMass() <= 0)
         {
+            if ((*it)->getMass() <= 0)
+            {
+                (*it)->explode(particles);
+            }
             delete (*it); // Free up dynamically allocated memory.
             it = particles.erase(it);
         }
@@ -38,29 +48,6 @@ void Environment::update()
             ++it;
         }
     }
-
-
-    for (Particle* p : particles)
-    {
-        p->update(particles);
-    }
-
-
-    // // Gravity.
-    // for (auto pIt1 = particles.begin(); pIt1 != particles.end(); ++pIt1)
-    // {
-    //     (*pIt1)->move();
-
-    //     for (auto pIt2 = particles.begin(); pIt2 != particles.end(); ++pIt2)
-    //     {
-    //         if (pIt1 != pIt2)
-    //         {
-    //             (*pIt1)->accelerateTowards((*pIt2)->x(), (*pIt2)->y(),
-    //              GRAVITATIONAL_CONSTANT, (*pIt2)->getMass());
-    //             (*pIt1)->coalesce(*(*pIt2), ELASTICITY_CONSTANT);
-    //         }
-    //     }
-    // }
 }
 
 

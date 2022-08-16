@@ -13,23 +13,32 @@ Attacker::Attacker(double x, double y)
 }
 
 
-void Attacker::update(const std::list<Particle*>& particles)
+void Attacker::update(std::list<Particle*>& particles)
 {
     move();
-    increaseWeaponStrength(0.25);
 
     if (nullptr != target)
     {
-        // Check if the target is still nearby.
-        if (distanceFrom(target->x(), target->y()) > range + 100)
+        // Check if the target is still nearby or still exists.
+        if (target->isAbsorbed() || target->getMass() <= 0 || distanceFrom(target->x(), target->y()) > range + 100)
         {
+            std::cout << "Target too far away." << (target->isAbsorbed() ? 1 : 0) << std::endl;
             target = nullptr;
             ws = 1;
         }
         // If it is nearby and the attacker is locked on, inflict damage.
         else if (lockedOn())
         {
-            
+            increaseWeaponStrength(0.25);
+            target->changeMass(-weaponDamage());
+            if (target->getMass() <= 0)
+            {
+                // If the target gets destroyed, reset the weapon strength.
+                std::cout << "Destroyed target." << std::endl;
+                target = nullptr;
+                ws = 1;
+            }
+            // std::cout << "Reduced target mass by " << std::pow(ws, ws / 20) << std::endl;
         }
         return;
     }
@@ -71,9 +80,9 @@ void Attacker::move()
         }
         else
         {
-            int chance = std::rand() % 100;
+            int chance = std::rand() % 1000;
 
-            if (chance < 20)
+            if (chance < 5)
             {
                 angle = std::fmod(std::rand(), 2 * 3.14);
             }
@@ -118,14 +127,46 @@ void Attacker::fire()
 }
 
 
-void Attacker::increaseWeaponStrength(double amount)
-{
-    ws += ws <= 100 ? amount : 0;
-}
-
-
 // Return a pointer to the target, if there is one.
 Particle* Attacker::getTarget()
 {
     return target;
+}
+
+
+SDL_Color Attacker::getColor()
+{
+    return color;
+}
+
+
+void Attacker::increaseWeaponStrength(double amount)
+{
+    ws += ws <= 200 ? amount : 0;
+}
+
+
+double Attacker::weaponDamage()
+{
+    if (ws < 20)
+    {
+        return 10000;
+    }
+    else if (ws < 40)
+    {
+        return 100000;
+    }
+    else if (ws < 60)
+    {
+        return 1000000;
+    }
+    else if (ws < 200)
+    {
+        return 10000000;
+    }
+    else 
+    {
+        return 100000000;
+    }
+
 }

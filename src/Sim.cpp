@@ -224,18 +224,17 @@ void Sim::drawParticleEffects(Particle* p)
             // Draw tier 4 laser.
             drawAttackerLaser(4, angle, a->x(), a->y(), tx, ty);
         }
-        else if (a->getWeaponStrength() < 80)
+        else if (a->getWeaponStrength() < 200)
         {
             // Draw tier 5 laser.
             drawAttackerLaser(5, angle, a->x(), a->y(), tx, ty);
         }
-        else if (a->getWeaponStrength() > 80)
+        else 
         {
             SDL_SetRenderDrawColor(ren, 200, 50, 200, 255);
             // Draw tier 6 laser.
             drawAttackerLaser(6, angle, a->x(), a->y(), tx, ty);
         }
-        
     }
 }
 
@@ -416,7 +415,7 @@ int Sim::run()
                 // Distance between mouse and orbitCenter.
                 double distBetweenBodies = std::hypot(mouseX - ocX, mouseY - ocY);
 
-                std::cout << "Choosing particle with radius " << ghostRad << " meters and mass " << Particle::calcMass(ghostRad, 1) << "kg" << std::endl;
+                std::cout << "Choosing particle with radius " << ghostRad << " meters and mass " << Particle::calcMass(ghostRad, 5500) << "kg" << std::endl;
 
                 // Calculate the necessary velocity.
                 double orbitalVelocity = std::sqrt( 

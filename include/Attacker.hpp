@@ -16,9 +16,7 @@ public:
         double y
     );
 
-    virtual ~Attacker()=default;
-
-    void update(const std::list<Particle*>& particles) override;
+    void update(std::list<Particle*>& particles) override;
 
     void move() override;
 
@@ -32,9 +30,13 @@ public:
     // Return a pointer to the target, if there is one.
     Particle* getTarget();
 
+    SDL_Color getColor() override;
+
 private:
     // Increase the weapon strength by a certain amount.
     void increaseWeaponStrength(double amount);
+
+    double weaponDamage();
 
     Particle* target;
     double ws;

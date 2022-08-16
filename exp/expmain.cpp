@@ -30,6 +30,14 @@ public:
 
 int main()
 {
-    std::cout << fmod(-3, 6) << std::endl;
+    int low = 1;
+    int high = 9;
+
+    for (int i = 0; i < 10; ++i)
+    {
+        std::cout << std::rand() % high + low << std::endl;
+    }
+
+
     
 }

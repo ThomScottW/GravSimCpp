@@ -32,7 +32,7 @@ public:
     double y();
 
     // Move and accelerate towards other particles.
-    virtual void update(const std::list<Particle*>& particles);
+    virtual void update(std::list<Particle*>& particles);
     
     // Move the particle based on its vector's direction and speed.
     virtual void move();
@@ -43,6 +43,9 @@ public:
     // Collide with another particle, coalescing into a larger particle. An elasticity
     // constant simulates the loss of energy after collision.
     void coalesce(Particle& p2, double constant);
+
+    // Explode this particle.
+    void explode(std::list<Particle*>& particles);
 
     // Return the distance from this particle's center to a point.
     double distanceFrom(double x, double y);
@@ -84,7 +87,8 @@ public:
     MotionVector<double> getVelocity();
 
     // Return an SDL_Color struct representing the r, g, and b values of this particle's color.
-    SDL_Color getColor();
+    // The color starts off as white and turns orange if the particle is low mass.
+    virtual SDL_Color getColor();
 
     // Simulate the effect of elasticity by applying a force to the particle's
     // motion vector. The elasticity constant is defined by the environment.
@@ -96,9 +100,11 @@ public:
 // can modify these member variables directly.
 protected:
     double rad;
+    double oriRad;
     double x_pos;
     double y_pos;
     double mass;
+    double oriMass;
     MotionVector<double> vec;
     double density;
     bool absorbed;

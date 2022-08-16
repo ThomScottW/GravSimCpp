@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdlib>
 #include "Particle.hpp"
+#include "Attacker.hpp"
 #include "Environment.hpp"
 
 
@@ -26,7 +27,6 @@ public:
     // Runs an SDL game loop.
     int run();
 
-  
     
 
 private:
@@ -38,7 +38,7 @@ private:
 
     // Draw an SDL circle at the given x and y coordinates, with a 
     // specified radius and opacity.
-    void drawSDLCircle(double x, double y, double radius, bool filled, int r=255, int g=255, int b=255);
+    void drawSDLCircle(double x, double y, double radius, bool filled, SDL_Color color);
 
     // Given points xc and yc for the center of a circle, and points x y
     // on the edge of the circle, draw the corresponding points in all 8 octants,
@@ -47,6 +47,12 @@ private:
 
     // Draw all the particles to the screen.
     void drawParticles();
+
+    // Draw effects for particles that have them.
+    void drawParticleEffects(Particle* p);
+
+    // Draw a laser depending on how powerful it is.
+    void drawAttackerLaser(int tier, double angle, double ax, double ay, double tx, double ty);
 
     // Draw the screen.
     void drawScreen();

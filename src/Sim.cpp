@@ -132,9 +132,9 @@ void Sim::drawCirclePixels(double xc, double yc, double x, double y, bool filled
 }
 
 
-void Sim::drawSDLCircle(double h, double k, double radius, bool filled, int r, int g, int b)
+void Sim::drawSDLCircle(double h, double k, double radius, bool filled, SDL_Color color)
 {
-    SDL_SetRenderDrawColor(ren, r, g, b, 255);
+    SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, 255);
 
     double x = 0;
     double y = radius;
@@ -165,14 +165,18 @@ void Sim::drawSDLCircle(double h, double k, double radius, bool filled, int r, i
 
 void Sim::drawParticles()
 {
-    for (Particle p : env.getParticles())
+    for (Particle* p : env.getParticles())
     {
-        drawSDLCircle(p.x(), p.y(), p.getRadius(), true);
+        drawSDLCircle(p->x(), p->y(), p->getRadius(), true, p->getColor());
+        if (!(p->hasGravity()))
+        {
+            drawParticleEffects(p);
+        }
     }
 
     if (showGhostParticle || choosingOrbit)
     {
-        drawSDLCircle(mouseX, mouseY, ghostRad, true, 100, 100, 100);
+        drawSDLCircle(mouseX, mouseY, ghostRad, true, SDL_Color{100, 100, 100});
         addText(std::to_string((int)ghostRad), mouseX, mouseY - 30);
     }
 
@@ -185,10 +189,75 @@ void Sim::drawParticles()
             (*orbitCenter).y(),
             std::hypot(mouseX - (*orbitCenter).x(), mouseY - (*orbitCenter).y()),
             false,
-            100, 100, 100
+            SDL_Color{100, 100, 100}
         );
+    }
+}
 
-        // Then, draw a circle, centered at the mouse cursor.
+
+void Sim::drawParticleEffects(Particle* p)
+{
+
+    Attacker* a = (Attacker*)p;
+    if (a->lockedOn())
+    {
+        SDL_SetRenderDrawColor(ren, 255, 165, 0, 255);
+        Particle* t = a->getTarget();
+        double tx = t->x();
+        double ty = t->y();
+        double dy = ty - a->y();
+        double dx = tx - a->x();
+        double angle = std::atan2(dy, dx);
+
+        if (a->getWeaponStrength() < 20)
+        {
+            // Draw tier 2 laser.
+            drawAttackerLaser(2, angle, a->x(), a->y(), tx, ty);
+        }
+        else if (a->getWeaponStrength() < 40)
+        {
+            // Draw tier 3 laser.
+            drawAttackerLaser(3, angle, a->x(), a->y(), tx, ty);
+        }
+        else if (a->getWeaponStrength() < 60)
+        {
+            // Draw tier 4 laser.
+            drawAttackerLaser(4, angle, a->x(), a->y(), tx, ty);
+        }
+        else if (a->getWeaponStrength() < 200)
+        {
+            // Draw tier 5 laser.
+            drawAttackerLaser(5, angle, a->x(), a->y(), tx, ty);
+        }
+        else 
+        {
+            SDL_SetRenderDrawColor(ren, 200, 50, 200, 255);
+            // Draw tier 6 laser.
+            drawAttackerLaser(6, angle, a->x(), a->y(), tx, ty);
+        }
+    }
+}
+
+
+
+
+void Sim::drawAttackerLaser(int tier, double angle, double ax, double ay, double tx, double ty)
+{
+    double tangentLower = angle + PI / 2;
+    double tangentHigher = angle - PI / 2;
+
+
+    SDL_RenderDrawLine(ren, ax, ay, tx, ty);
+
+    while (tier > 0)
+    {
+        double exL = tx + std::cos(tangentLower) * tier;
+        double eyL = ty + std::sin(tangentLower) * tier;
+        double exH = tx + std::cos(tangentHigher) * tier;
+        double eyH = ty + std::sin(tangentHigher) * tier;
+        SDL_RenderDrawLine(ren, ax, ay, exL, eyL);
+        SDL_RenderDrawLine(ren, ax, ay, exH, eyH);
+        --tier;
     }
 }
 
@@ -285,7 +354,7 @@ int Sim::run()
                 else if (Event.button.button == SDL_BUTTON_RIGHT && showGhostParticle)
                 {
                     MotionVector<double> newMot = MotionVector<double>(0, 0);
-                    env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot));
+                    env.placeParticle(new Particle(ghostRad, mouseX, mouseY, newMot));
                 }
             }
             else if (Event.type == SDL_MOUSEMOTION)
@@ -344,14 +413,9 @@ int Sim::run()
                 orbitAngle = std::fmod(orbitAngle - 0.5 * M_PI, 2 * M_PI);
 
                 // Distance between mouse and orbitCenter.
-                // double orbiterMass = Particle::calcMass(ghostRad, 1);
                 double distBetweenBodies = std::hypot(mouseX - ocX, mouseY - ocY);
-                // double massSum = orbiterMass + (*orbitCenter).getMass();
 
-                // double baryDist = distBetweenBodies - ((distBetweenBodies * orbiterMass) / (massSum));
-
-                std::cout << "Choosing particle with radius " << ghostRad << " meters and mass " << Particle::calcMass(ghostRad, 1) << "kg" << std::endl;
-                
+                std::cout << "Choosing particle with radius " << ghostRad << " meters and mass " << Particle::calcMass(ghostRad, 5500) << "kg" << std::endl;
 
                 // Calculate the necessary velocity.
                 double orbitalVelocity = std::sqrt( 
@@ -364,7 +428,16 @@ int Sim::run()
                 );
 
                 // Place the particle.
-                env.placeParticle(Particle(ghostRad, mouseX, mouseY, newMot + (*orbitCenter).getVelocity()));
+                env.placeParticle(new Particle(
+                    ghostRad,
+                    mouseX, mouseY,
+                    newMot + (*orbitCenter).getVelocity()
+                ));
+            }
+            else if (Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_a)
+            {
+                // Place an attacker, false sets gravity to be off.
+                env.placeParticle(new Attacker(mouseX, mouseY));
             }
         }
 

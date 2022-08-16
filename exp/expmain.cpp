@@ -4,30 +4,40 @@
 
 
 
+class A
+{
+public:
+    A()=default;
+
+    virtual ~A()=default;
+
+    virtual void move() {std::cout << "A::move()" << this << std::endl;}
+};
+
+
+
+
+class B : public A
+{
+public:
+    B() {};
+    virtual ~B()=default;
+
+    void move() override {std::cout << "B::move()" << std::endl;}
+};
+
+
+
 int main()
 {
-    std::cout << "Experimentation main function successfully running!" << std::endl;
+    int low = 1;
+    int high = 9;
 
-    std::vector<int> balls = {1, 2, 3, 4, 5, 6};
-
-
-    for (auto it = balls.begin(); it != balls.end();)
+    for (int i = 0; i < 10; ++i)
     {
-        if ((*it) % 2 == 0)
-        {
-            it = balls.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
-
-    for (int i : balls)
-    {
-        std::cout << i << std::endl;
+        std::cout << std::rand() % high + low << std::endl;
     }
 
 
-    return 0;
+    
 }
